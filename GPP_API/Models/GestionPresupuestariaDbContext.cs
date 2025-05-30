@@ -58,6 +58,9 @@ public partial class GestionPresupuestariaDbContext : DbContext
                 .HasColumnName("message");
             entity.Property(e => e.ProjectId).HasColumnName("project_id");
 
+            entity.HasOne(d => d.Project).WithMany(p => p.Alerts)
+                .HasForeignKey(d => d.ProjectId)
+                .HasConstraintName("FK__Alerts__project___5629CD9C");
         });
 
         modelBuilder.Entity<AuditLog>(entity =>
@@ -79,6 +82,9 @@ public partial class GestionPresupuestariaDbContext : DbContext
                 .HasColumnName("action_type");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
+            entity.HasOne(d => d.User).WithMany(p => p.AuditLogs)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK__AuditLogs__user___59FA5E80");
         });
 
         modelBuilder.Entity<BudgetPart>(entity =>
@@ -102,7 +108,9 @@ public partial class GestionPresupuestariaDbContext : DbContext
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("remaining_amount");
 
-
+            entity.HasOne(d => d.Project).WithMany(p => p.BudgetParts)
+                .HasForeignKey(d => d.ProjectId)
+                .HasConstraintName("FK__BudgetPar__proje__45F365D3");
         });
 
         modelBuilder.Entity<Expense>(entity =>
@@ -129,7 +137,13 @@ public partial class GestionPresupuestariaDbContext : DbContext
             entity.Property(e => e.ExpenseDate).HasColumnName("expense_date");
             entity.Property(e => e.ProjectId).HasColumnName("project_id");
 
+            entity.HasOne(d => d.BudgetPart).WithMany(p => p.Expenses)
+                .HasForeignKey(d => d.BudgetPartId)
+                .HasConstraintName("FK__Expenses__budget__4BAC3F29");
 
+            entity.HasOne(d => d.Project).WithMany(p => p.Expenses)
+                .HasForeignKey(d => d.ProjectId)
+                .HasConstraintName("FK__Expenses__projec__4AB81AF0");
         });
 
         modelBuilder.Entity<Notification>(entity =>
@@ -157,7 +171,10 @@ public partial class GestionPresupuestariaDbContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("user_email");
 
-
+            entity.HasOne(d => d.UserEmailNavigation).WithMany(p => p.Notifications)
+                .HasPrincipalKey(p => p.Email)
+                .HasForeignKey(d => d.UserEmail)
+                .HasConstraintName("FK__Notificat__user___5EBF139D");
         });
 
         modelBuilder.Entity<Project>(entity =>
@@ -194,6 +211,10 @@ public partial class GestionPresupuestariaDbContext : DbContext
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("remaining_budget");
 
+            entity.HasOne(d => d.ManagerEmailNavigation).WithMany(p => p.Projects)
+                .HasPrincipalKey(p => p.Email)
+                .HasForeignKey(d => d.ManagerEmail)
+                .HasConstraintName("FK__Projects__manage__403A8C7D");
         });
 
         modelBuilder.Entity<RoleChangeRequest>(entity =>
@@ -222,6 +243,10 @@ public partial class GestionPresupuestariaDbContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("user_email");
 
+            entity.HasOne(d => d.UserEmailNavigation).WithMany(p => p.RoleChangeRequests)
+                .HasPrincipalKey(p => p.Email)
+                .HasForeignKey(d => d.UserEmail)
+                .HasConstraintName("FK__RoleChang__user___5165187F");
         });
 
         modelBuilder.Entity<User>(entity =>

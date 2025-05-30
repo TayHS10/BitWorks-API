@@ -17,7 +17,7 @@ public partial class BudgetPart
 
     public DateTime? CreatedAt { get; set; }
 
-    public  ICollection<Expense> Expenses { get; set; } = new List<Expense>();
+    public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>();
 
-    public  Project? Project { get; set; }
+    public virtual Project? Project { get; set; }
 }

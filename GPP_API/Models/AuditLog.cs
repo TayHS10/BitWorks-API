@@ -15,5 +15,5 @@ public partial class AuditLog
 
     public DateTime? ActionDate { get; set; }
 
-    public  User? User { get; set; }
+    public virtual User? User { get; set; }
 }

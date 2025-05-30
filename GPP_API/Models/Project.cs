@@ -21,4 +21,11 @@ public partial class Project
 
     public string? ManagerEmail { get; set; }
 
+    public virtual ICollection<Alert> Alerts { get; set; } = new List<Alert>();
+
+    public virtual ICollection<BudgetPart> BudgetParts { get; set; } = new List<BudgetPart>();
+
+    public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>();
+
+    public virtual User? ManagerEmailNavigation { get; set; }
 }

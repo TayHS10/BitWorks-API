@@ -21,4 +21,7 @@ public partial class Expense
 
     public DateTime? CreatedAt { get; set; }
 
+    public virtual BudgetPart? BudgetPart { get; set; }
+
+    public virtual Project? Project { get; set; }
 }

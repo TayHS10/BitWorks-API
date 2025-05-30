@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using GPP_API.Models;
 using Microsoft.EntityFrameworkCore;
+using GPP_API.Models;
+using GPP_API.DTO;
 
 namespace GPP_API.Controllers
 {
@@ -15,76 +16,184 @@ namespace GPP_API.Controllers
             _context = context;
         }
 
-        [HttpPost("CreateProject")]
-        public async Task<IActionResult> CreateProject([FromBody] Project project)
+        // GET: api/Project
+        [HttpGet]
+        public async Task<IActionResult> GetProjects()
         {
-            project.CreatedAt ??= DateTime.UtcNow;
-
-            _context.Projects.Add(project);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetProjectById), new { id = project.ProjectId }, project);
-        }
-
-        [HttpGet("GetAllProjects")]
-        public async Task<IActionResult> GetAllProjects()
-        {
-            var projects = await _context.Projects.ToListAsync();
-            return Ok(projects);
-        }
-
-        [HttpGet("GetProjectById/{id}")]
-        public async Task<IActionResult> GetProjectById(int id)
-        {
-            var project = await _context.Projects.FindAsync(id);
-
-            if (project == null)
+            try
             {
-                return NotFound();
-            }
+                var projects = await _context.Projects
+                    .Include(p => p.Alerts)
+                    .Include(p => p.BudgetParts).ThenInclude(b => b.Expenses)
+                    .Include(p => p.Expenses)
+                    .Include(p => p.ManagerEmailNavigation)
+                    .ToListAsync();
 
-            return Ok(project);
+                var dtoList = projects.Select(MapToProjectDTO).ToList();
+
+                return Ok(new { success = true, data = dtoList });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error al obtener proyectos.", detail = ex.Message });
+            }
         }
 
-        [HttpPut("UpdateProject/{id}")]
-        public async Task<IActionResult> UpdateProject(int id, [FromBody] Project updatedProject)
+        // GET: api/Project/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetProject(int id)
         {
-            if (id != updatedProject.ProjectId)
+            try
             {
-                return BadRequest("Project ID mismatch");
-            }
+                var project = await _context.Projects
+                    .Include(p => p.Alerts)
+                    .Include(p => p.BudgetParts).ThenInclude(b => b.Expenses)
+                    .Include(p => p.Expenses)
+                    .Include(p => p.ManagerEmailNavigation)
+                    .FirstOrDefaultAsync(p => p.ProjectId == id);
 
-            var existingProject = await _context.Projects.FindAsync(id);
-            if (existingProject == null)
+                if (project == null)
+                    return NotFound(new { success = false, message = $"Proyecto con id {id} no encontrado." });
+
+                var dto = MapToProjectDTO(project);
+                return Ok(new { success = true, data = dto });
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(500, new { success = false, message = "Error al obtener el proyecto.", detail = ex.Message });
             }
-
-            existingProject.ProjectCode = updatedProject.ProjectCode;
-            existingProject.ProjectName = updatedProject.ProjectName;
-            existingProject.Description = updatedProject.Description;
-            existingProject.Budget = updatedProject.Budget;
-            existingProject.RemainingBudget = updatedProject.RemainingBudget;
-            existingProject.ManagerEmail = updatedProject.ManagerEmail;
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
-        [HttpDelete("DeleteProject/{id}")]
+        // POST: api/Project
+        [HttpPost]
+        public async Task<IActionResult> CreateProject(CreateProjectDTO dto)
+        {
+            try
+            {
+                var managerExists = await _context.Users.AnyAsync(u => u.Email == dto.ManagerEmail);
+                if (!managerExists)
+                    return BadRequest(new { success = false, message = "El manager especificado no existe." });
+
+                if (dto.BudgetParts == null || !dto.BudgetParts.Any())
+                    return BadRequest(new { success = false, message = "Debe incluir al menos una partida presupuestaria." });
+
+                // Calcular el presupuesto total sumando las partidas
+                decimal totalBudget = dto.BudgetParts.Sum(bp => bp.AllocatedAmount);
+
+                var project = new Project
+                {
+                    ProjectCode = dto.ProjectCode,
+                    ProjectName = dto.ProjectName,
+                    Description = dto.Description,
+                    Budget = totalBudget,
+                    RemainingBudget = totalBudget,
+                    CreatedAt = DateTime.UtcNow,
+                    ManagerEmail = dto.ManagerEmail,
+                    // Asumiendo que Project tiene navegación para BudgetParts
+                    BudgetParts = dto.BudgetParts.Select(bp => new BudgetPart
+                    {
+                        PartName = bp.PartName,
+                        AllocatedAmount = bp.AllocatedAmount,
+                        RemainingAmount = bp.AllocatedAmount,
+                        CreatedAt = DateTime.UtcNow
+                    }).ToList()
+                };
+
+                _context.Projects.Add(project);
+                await _context.SaveChangesAsync();
+
+                var resultDto = MapToProjectDTO(project);
+
+                return CreatedAtAction(nameof(GetProject), new { id = project.ProjectId }, new { success = true, data = resultDto });
+            }
+            catch (DbUpdateException dbEx)
+            {
+                return StatusCode(500, new { success = false, message = "Error al guardar el proyecto en la base de datos.", detail = dbEx.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error inesperado al crear el proyecto.", detail = ex.Message });
+            }
+        }
+
+
+        // DELETE: api/Project/5
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProject(int id)
         {
-            var project = await _context.Projects.FindAsync(id);
-            if (project == null)
+            try
             {
-                return NotFound();
+                var project = await _context.Projects.FindAsync(id);
+                if (project == null)
+                    return NotFound(new { success = false, message = $"Proyecto con id {id} no encontrado." });
+
+                _context.Projects.Remove(project);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Proyecto eliminado correctamente." });
             }
-
-            _context.Projects.Remove(project);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error al eliminar el proyecto.", detail = ex.Message });
+            }
         }
+
+        private bool ProjectExists(int id)
+        {
+            return _context.Projects.Any(e => e.ProjectId == id);
+        }
+
+        // Mapeo interno a DTO
+        private static ProjectDTO MapToProjectDTO(Project p) => new()
+        {
+            ProjectId = p.ProjectId,
+            ProjectCode = p.ProjectCode,
+            ProjectName = p.ProjectName,
+            Description = p.Description,
+            Budget = p.Budget,
+            RemainingBudget = p.RemainingBudget,
+            CreatedAt = p.CreatedAt,
+            ManagerEmail = p.ManagerEmail,
+            Manager = p.ManagerEmailNavigation == null ? null : new UserDTO
+            {
+                UserId = p.ManagerEmailNavigation.UserId,
+                FullName = p.ManagerEmailNavigation.FullName,
+                Email = p.ManagerEmailNavigation.Email,
+                Role = p.ManagerEmailNavigation.Role
+            },
+            Alerts = p.Alerts.Select(a => new AlertDTO
+            {
+                AlertId = a.AlertId,
+                AlertType = a.AlertType,
+                Message = a.Message,
+                AlertDate = a.AlertDate
+            }).ToList(),
+            BudgetParts = p.BudgetParts.Select(b => new BudgetPartDTO
+            {
+                BudgetPartId = b.BudgetPartId,
+                PartName = b.PartName,
+                AllocatedAmount = b.AllocatedAmount,
+                RemainingAmount = b.RemainingAmount,
+                CreatedAt = b.CreatedAt,
+                Expenses = b.Expenses.Select(e => new ExpenseDTO
+                {
+                    ExpenseId = e.ExpenseId,
+                    ExpenseAmount = e.ExpenseAmount,
+                    ExpenseDate = e.ExpenseDate,
+                    DocumentReference = e.DocumentReference,
+                    Description = e.Description,
+                    CreatedAt = e.CreatedAt
+                }).ToList()
+            }).ToList(),
+            Expenses = p.Expenses.Select(e => new ExpenseDTO
+            {
+                ExpenseId = e.ExpenseId,
+                ExpenseAmount = e.ExpenseAmount,
+                ExpenseDate = e.ExpenseDate,
+                DocumentReference = e.DocumentReference,
+                Description = e.Description,
+                CreatedAt = e.CreatedAt
+            }).ToList()
+        };
     }
 }

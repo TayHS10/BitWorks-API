@@ -17,4 +17,5 @@ public partial class RoleChangeRequest
 
     public DateTime? CreatedAt { get; set; }
 
+    public virtual User? UserEmailNavigation { get; set; }
 }
