@@ -123,9 +123,30 @@ namespace GPP_API.Controllers
         }
 
 
-        // DELETE: api/Project/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProject(int id)
+        //// DELETE: api/Project/5
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteProject(int id)
+        //{
+        //    try
+        //    {
+        //        var project = await _context.Projects.FindAsync(id);
+        //        if (project == null)
+        //            return NotFound(new { success = false, message = $"Proyecto con id {id} no encontrado." });
+
+        //        _context.Projects.Remove(project);
+        //        await _context.SaveChangesAsync();
+
+        //        return Ok(new { success = true, message = "Proyecto eliminado correctamente." });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { success = false, message = "Error al eliminar el proyecto.", detail = ex.Message });
+        //    }
+        //}
+
+        // PUT: api/Project/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProject(int id, UpdateProjectDTO dto)
         {
             try
             {
@@ -133,16 +154,31 @@ namespace GPP_API.Controllers
                 if (project == null)
                     return NotFound(new { success = false, message = $"Proyecto con id {id} no encontrado." });
 
-                _context.Projects.Remove(project);
+                if (dto.ManagerEmail != null)
+                {
+                    var managerExists = await _context.Users.AnyAsync(u => u.Email == dto.ManagerEmail);
+                    if (!managerExists)
+                        return BadRequest(new { success = false, message = "El manager especificado no existe." });
+
+                    project.ManagerEmail = dto.ManagerEmail;
+                }
+
+                project.ProjectCode = dto.ProjectCode ?? project.ProjectCode;
+                project.ProjectName = dto.ProjectName ?? project.ProjectName;
+                project.Description = dto.Description ?? project.Description;
+
+                // Guardar cambios
                 await _context.SaveChangesAsync();
 
-                return Ok(new { success = true, message = "Proyecto eliminado correctamente." });
+                var updatedDto = MapToProjectDTO(project);
+                return Ok(new { success = true, message = "Proyecto actualizado correctamente.", data = updatedDto });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = "Error al eliminar el proyecto.", detail = ex.Message });
+                return StatusCode(500, new { success = false, message = "Error al actualizar el proyecto.", detail = ex.Message });
             }
         }
+
 
         private bool ProjectExists(int id)
         {
