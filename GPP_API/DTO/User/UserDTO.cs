@@ -1,4 +1,4 @@
-﻿namespace GPP_API.DTO
+﻿namespace GPP_API.DTO.User
 {
     public class UserDTO
     {

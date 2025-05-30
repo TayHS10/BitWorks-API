@@ -1,4 +1,9 @@
-﻿namespace GPP_API.DTO
+﻿using GPP_API.DTO.Alert;
+using GPP_API.DTO.BudgetPart;
+using GPP_API.DTO.Expense;
+using GPP_API.DTO.User;
+
+namespace GPP_API.DTO.Project
 {
     public class ProjectDTO
     {

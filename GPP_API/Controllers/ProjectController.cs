@@ -1,7 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GPP_API.Models;
+using GPP_API.DTO.Project;
+using GPP_API.DTO.BudgetPart;
+using GPP_API.DTO.Alert;
+using GPP_API.DTO.User;
+using GPP_API.DTO.Expense;
 using GPP_API.DTO;
+
 
 namespace GPP_API.Controllers
 {

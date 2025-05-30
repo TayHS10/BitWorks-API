@@ -1,4 +1,6 @@
-﻿namespace GPP_API.DTO
+﻿using GPP_API.DTO.Expense;
+
+namespace GPP_API.DTO.BudgetPart
 {
     public class BudgetPartDTO
     {

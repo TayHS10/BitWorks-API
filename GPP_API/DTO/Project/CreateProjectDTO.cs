@@ -1,4 +1,6 @@
-﻿namespace GPP_API.DTO
+﻿using GPP_API.DTO.BudgetPart;
+
+namespace GPP_API.DTO.Project
 {
     public class CreateProjectDTO
     {
