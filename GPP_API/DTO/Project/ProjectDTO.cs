@@ -13,6 +13,7 @@ namespace GPP_API.DTO.Project
         public string? Description { get; set; }
         public decimal Budget { get; set; }
         public decimal RemainingBudget { get; set; }
+        public string Status { get; set; }
         public DateTime? CreatedAt { get; set; }
 
         public string? ManagerEmail { get; set; }

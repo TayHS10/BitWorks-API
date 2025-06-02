@@ -12,6 +12,7 @@ public partial class Alert
     public string? AlertType { get; set; }
 
     public string Message { get; set; } = null!;
+    public string Status { get; set; }
 
     public DateTime? AlertDate { get; set; }
 

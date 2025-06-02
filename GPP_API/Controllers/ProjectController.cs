@@ -93,6 +93,7 @@ namespace GPP_API.Controllers
                     Description = dto.Description,
                     Budget = totalBudget,
                     RemainingBudget = totalBudget,
+                    Status = "Active",
                     CreatedAt = DateTime.UtcNow,
                     ManagerEmail = dto.ManagerEmail,
                     // Asumiendo que Project tiene navegación para BudgetParts
@@ -121,7 +122,6 @@ namespace GPP_API.Controllers
                 return StatusCode(500, new { success = false, message = "Error inesperado al crear el proyecto.", detail = ex.Message });
             }
         }
-
 
         //// DELETE: api/Project/5
         //[HttpDelete("{id}")]
@@ -196,6 +196,7 @@ namespace GPP_API.Controllers
             RemainingBudget = p.RemainingBudget,
             CreatedAt = p.CreatedAt,
             ManagerEmail = p.ManagerEmail,
+            Status = p.Status,
             Manager = p.ManagerEmailNavigation == null ? null : new UserDTO
             {
                 UserId = p.ManagerEmailNavigation.UserId,

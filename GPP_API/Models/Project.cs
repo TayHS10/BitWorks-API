@@ -14,6 +14,7 @@ public partial class Project
     public string? Description { get; set; }
 
     public decimal Budget { get; set; }
+    public string Status {  get; set; }
 
     public decimal RemainingBudget { get; set; }
 

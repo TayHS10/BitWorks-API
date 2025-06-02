@@ -12,6 +12,7 @@ public partial class BudgetPart
     public string PartName { get; set; } = null!;
 
     public decimal AllocatedAmount { get; set; }
+    public string Status { get; set; }
 
     public decimal RemainingAmount { get; set; }
 

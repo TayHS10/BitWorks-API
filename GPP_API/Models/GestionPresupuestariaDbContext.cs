@@ -56,6 +56,11 @@ public partial class GestionPresupuestariaDbContext : DbContext
                 .HasMaxLength(1000)
                 .IsUnicode(false)
                 .HasColumnName("message");
+
+            entity.Property(e => e.Status)
+            .HasMaxLength(50)
+            .IsUnicode(false)
+            .HasColumnName("status");
             entity.Property(e => e.ProjectId).HasColumnName("project_id");
 
             entity.HasOne(d => d.Project).WithMany(p => p.Alerts)
@@ -111,6 +116,11 @@ public partial class GestionPresupuestariaDbContext : DbContext
             entity.HasOne(d => d.Project).WithMany(p => p.BudgetParts)
                 .HasForeignKey(d => d.ProjectId)
                 .HasConstraintName("FK__BudgetPar__proje__45F365D3");
+
+            entity.Property(e => e.Status)
+            .HasMaxLength(50)
+            .IsUnicode(false)
+            .HasColumnName("status");
         });
 
         modelBuilder.Entity<Expense>(entity =>
@@ -134,6 +144,10 @@ public partial class GestionPresupuestariaDbContext : DbContext
             entity.Property(e => e.ExpenseAmount)
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("expense_amount");
+            entity.Property(e => e.Status)
+            .HasMaxLength(50)
+            .IsUnicode(false)
+            .HasColumnName("status");
             entity.Property(e => e.ExpenseDate).HasColumnName("expense_date");
             entity.Property(e => e.ProjectId).HasColumnName("project_id");
 
@@ -170,6 +184,11 @@ public partial class GestionPresupuestariaDbContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("user_email");
+
+            entity.Property(e => e.Status)
+            .HasMaxLength(50)
+            .IsUnicode(false)
+            .HasColumnName("status");
 
             entity.HasOne(d => d.UserEmailNavigation).WithMany(p => p.Notifications)
                 .HasPrincipalKey(p => p.Email)
@@ -210,6 +229,11 @@ public partial class GestionPresupuestariaDbContext : DbContext
             entity.Property(e => e.RemainingBudget)
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("remaining_budget");
+
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("status");
 
             entity.HasOne(d => d.ManagerEmailNavigation).WithMany(p => p.Projects)
                 .HasPrincipalKey(p => p.Email)
@@ -276,10 +300,13 @@ public partial class GestionPresupuestariaDbContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("role");
+            entity.Property(e => e.Status)
+            .HasMaxLength(50)
+            .IsUnicode(false)
+            .HasColumnName ("status");
         });
 
         OnModelCreatingPartial(modelBuilder);
     }
-
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }
