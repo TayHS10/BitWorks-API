@@ -14,11 +14,17 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<GPP_API.Models.GestionPresupuestariaDbContext>(
+builder.Services.AddDbContext<GPP_API.Models.ApplicationDbContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("StringConexion")));
 
 
 builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
+
+// ***********************************************************************************
+// ¡AQUÍ ES DONDE DEBES AGREGAR EL REGISTRO PARA IEmailService!
+// Asumiendo que tu implementación se llama EmailService y está en GPP_API.Services
+builder.Services.AddScoped<IEmailService, EmailService>(); // O AddTransient, o AddSingleton
+// ***********************************************************************************
 
 var key = builder.Configuration.GetValue<string>("JwtSettings:Key");
 var keyBytes = Encoding.ASCII.GetBytes(key);

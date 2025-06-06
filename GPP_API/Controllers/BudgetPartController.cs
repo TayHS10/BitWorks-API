@@ -10,9 +10,9 @@ namespace GPP_API.Controllers
     [Route("api/[controller]")]
     public class BudgetPartController : Controller
     {
-        private readonly GestionPresupuestariaDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public BudgetPartController(GestionPresupuestariaDbContext context)
+        public BudgetPartController(ApplicationDbContext context)
         {
             _context = context;
         }

@@ -16,15 +16,13 @@ namespace GPP_API.Controllers
     [Route("api/[controller]")]
     public class ProjectController : ControllerBase
     {
-        private readonly GestionPresupuestariaDbContext _context;
+        private readonly ApplicationDbContext _context;
 
         // Constructor que recibe el contexto de base de datos por inyección de dependencias
-        public ProjectController(GestionPresupuestariaDbContext context)
+        public ProjectController(ApplicationDbContext context)
         {
             _context = context;
         }
-
-
 
         // =========================
         // GET: api/Project
@@ -255,7 +253,7 @@ namespace GPP_API.Controllers
             CreatedAt = p.CreatedAt,
             ManagerEmail = p.ManagerEmail,
             Status = p.Status,
-            Manager = p.ManagerEmailNavigation == null ? null : new UserDTO
+            Manager = p.ManagerEmailNavigation == null ? null : new UserResponseDTO
             {
                 UserId = p.ManagerEmailNavigation.UserId,
                 FullName = p.ManagerEmailNavigation.FullName,

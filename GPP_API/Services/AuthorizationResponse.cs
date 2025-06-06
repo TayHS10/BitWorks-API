@@ -2,8 +2,8 @@
 {
     public class AuthorizationResponse
     {
-        public string Token { get; set; }
+        public string Token { get; set; } = null!;
         public bool Result { get; set; }
-        public string Msj { get; set; }
+        public string Msj { get; set; } = null!;
     }
 }

@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GPP_API.Models;
 
-public partial class GestionPresupuestariaDbContext : DbContext
+public partial class ApplicationDbContext : DbContext
 {
-    public GestionPresupuestariaDbContext()
+    public ApplicationDbContext()
     {
     }
 
-    public GestionPresupuestariaDbContext(DbContextOptions<GestionPresupuestariaDbContext> options)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
     }
@@ -30,6 +30,8 @@ public partial class GestionPresupuestariaDbContext : DbContext
     public virtual DbSet<RoleChangeRequest> RoleChangeRequests { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+
+    public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.

@@ -17,7 +17,7 @@ namespace GPP_API.DTO.Project
         public DateTime? CreatedAt { get; set; }
 
         public string? ManagerEmail { get; set; }
-        public UserDTO? Manager { get; set; }
+        public UserResponseDTO? Manager { get; set; }
 
         public List<AlertDTO> Alerts { get; set; } = new();
         public List<BudgetPartDTO> BudgetParts { get; set; } = new();
