@@ -1,4 +1,4 @@
-﻿using GPP_API.Models;
+﻿using GPP_API.DTO.User;
 
 namespace GPP_API.Services
 {

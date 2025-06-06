@@ -1,4 +1,4 @@
-﻿namespace GPP_API.Models
+﻿namespace GPP_API.DTO.User
 {
     public class LoginDTO
     {
