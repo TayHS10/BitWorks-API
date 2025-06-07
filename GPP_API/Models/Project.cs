@@ -14,7 +14,7 @@ public partial class Project
     public string? Description { get; set; }
 
     public decimal Budget { get; set; }
-    public string Status {  get; set; }
+    public string Status { get; set; } = null!;
 
     public decimal RemainingBudget { get; set; }
 
@@ -26,7 +26,7 @@ public partial class Project
 
     public virtual ICollection<BudgetPart> BudgetParts { get; set; } = new List<BudgetPart>();
 
-    public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>();
+    //public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>();
 
     public virtual User? ManagerEmailNavigation { get; set; }
 }

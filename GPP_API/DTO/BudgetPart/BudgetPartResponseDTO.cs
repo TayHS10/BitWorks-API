@@ -2,7 +2,7 @@
 
 namespace GPP_API.DTO.BudgetPart
 {
-    public class BudgetPartDTO
+    public class BudgetPartResponseDTO
     {
         public int BudgetPartId { get; set; }
         public string PartName { get; set; } = null!;

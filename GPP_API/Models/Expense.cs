@@ -10,7 +10,7 @@ public partial class Expense
     public int? ProjectId { get; set; }
 
     public int? BudgetPartId { get; set; }
-    public string Status { get; set; }
+    public string Status { get; set; } = null!;
 
     public decimal ExpenseAmount { get; set; }
 

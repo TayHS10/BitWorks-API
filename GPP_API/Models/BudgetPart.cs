@@ -7,12 +7,12 @@ public partial class BudgetPart
 {
     public int BudgetPartId { get; set; }
 
-    public int? ProjectId { get; set; }
+    public int ProjectId { get; set; }
 
     public string PartName { get; set; } = null!;
 
     public decimal AllocatedAmount { get; set; }
-    public string Status { get; set; }
+    public string Status { get; set; } = null!;
 
     public decimal RemainingAmount { get; set; }
 

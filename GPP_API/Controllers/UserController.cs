@@ -21,8 +21,6 @@ namespace GPP_API.Controllers
         // '_authorizationServices' is the conventional name for this service instance.
         private readonly IAuthorizationService _authorizationServices;
 
-
-
         /// <summary>
         /// Initializes a new instance of the <see cref="UserController"/> class.
         /// </summary>
@@ -388,34 +386,6 @@ namespace GPP_API.Controllers
                 // Return HTTP 500 Internal Server Error, providing a general error message and the exception details.
                 return StatusCode(500, new { success = false, message = "An error occurred during account reactivation.", detail = ex.Message });
             }
-        }
-
-        /// <summary>
-        /// Authenticates a user and returns an authorization token.
-        /// </summary>
-        /// <param name="authenticated">The login credentials (email and password) provided by the user.</param>
-        /// <returns>
-        /// An <see cref="IActionResult"/> representing the HTTP response.
-        /// Returns HTTP 200 OK with the authentication token on success.
-        /// Returns HTTP 401 Unauthorized if authentication fails due to invalid credentials.
-        /// </returns>
-        /// <response code="200">Returns the authorization token upon successful authentication.</response>
-        /// <response code="401">If authentication fails due to invalid credentials.</response>
-        [HttpPost("authenticate")]
-        public async Task<IActionResult> Authenticate([FromBody] LoginUserDTO authenticated)
-        {
-            // Call the authorization service to attempt to return an authentication token based on the provided credentials.
-            var authorized = await _authorizationServices.ReturnToken(authenticated);
-
-            // If the authorization service returns null, it indicates that authentication failed.
-            if (authorized == null)
-            {
-                // Return an HTTP 401 Unauthorized response with a generic error message.
-                return Unauthorized(new { success = false, message = "Invalid credentials." });
-            }
-
-            // If authentication is successful, return an HTTP 200 OK response with the generated token.
-            return Ok(authorized);
         }
 
         /// <summary>
