@@ -226,7 +226,7 @@ namespace GPP_API.Controllers
         /// <param name="b">The <see cref="BudgetPart"/> entity to be mapped.</param>
         /// <returns>
         /// A new <see cref="BudgetPartResponseDTO"/> instance populated with data from the provided <see cref="BudgetPart"/> entity,
-        /// including a nested list of <see cref="ExpenseDTO"/> for its associated expenses.
+        /// including a nested list of <see cref="ExpenseResponseDTO"/> for its associated expenses.
         /// </returns>
         /// <remarks>
         /// This **static mapping method** is essential for presenting budget part data through the API. It ensures that
@@ -246,7 +246,7 @@ namespace GPP_API.Controllers
 
             // Perform a nested mapping for the 'Expenses' collection.
             // Each Expense entity related to the BudgetPart is transformed into an ExpenseDTO.
-            Expenses = b.Expenses.Select(e => new ExpenseDTO
+            Expenses = b.Expenses.Select(e => new ExpenseResponseDTO
             {
                 ExpenseId = e.ExpenseId,
                 ExpenseAmount = e.ExpenseAmount,

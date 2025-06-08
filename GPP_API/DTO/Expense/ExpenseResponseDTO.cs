@@ -1,6 +1,6 @@
 ﻿namespace GPP_API.DTO.Expense
 {
-    public class ExpenseDTO
+    public class ExpenseResponseDTO
     {
         public int ExpenseId { get; set; }
         public decimal ExpenseAmount { get; set; }
