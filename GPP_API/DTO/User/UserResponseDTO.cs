@@ -1,0 +1,17 @@
+﻿namespace GPP_API.DTO.User
+{
+
+    public class UserResponseDTO
+    {
+  
+        public int UserId { get; set; }
+
+
+        public string FullName { get; set; } = null!;
+
+        public string Email { get; set; } = null!;
+
+
+        public string Role { get; set; } = null!;
+    }
+}
