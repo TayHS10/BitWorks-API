@@ -9,7 +9,6 @@ namespace GPP_API.DTO.BudgetPart
         public decimal AllocatedAmount { get; set; }
         public decimal RemainingAmount { get; set; }
         public DateTime? CreatedAt { get; set; }
-
         public List<ExpenseResponseDTO> Expenses { get; set; } = new();
     }
 

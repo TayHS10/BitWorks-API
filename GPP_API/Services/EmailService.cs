@@ -12,12 +12,25 @@ namespace GPP_API.Services
         private readonly IConfiguration _configuration;
         private readonly ILogger<EmailService> _logger;
 
+        /// <summary>
+        /// Inicializa una nueva instancia de la clase <see cref="EmailService"/>.
+        /// </summary>
+        /// <param name="configuration">La configuración de la aplicación, utilizada para acceder a los valores de configuración relacionados con el servicio de correo electrónico.</param>
+        /// <param name="logger">El registrador utilizado para registrar información y errores relacionados con el servicio de correo electrónico.</param>
         public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
         {
             _configuration = configuration;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Envía un correo electrónico de forma asíncrona utilizando la configuración SMTP proporcionada.
+        /// </summary>
+        /// <param name="toEmail">La dirección de correo electrónico del destinatario.</param>
+        /// <param name="subject">El asunto del correo electrónico.</param>
+        /// <param name="message">El contenido del mensaje del correo electrónico, en formato HTML.</param>
+        /// <returns>Una tarea que representa la operación asíncrona de envío de correo electrónico.</returns>
+        /// <exception cref="InvalidOperationException">Se lanza si la configuración SMTP es incompleta o si ocurre un error durante el envío del correo.</exception>
         public async Task SendEmailAsync(string toEmail, string subject, string message)
         {
             var smtpHost = _configuration["SmtpSettings:Host"];
@@ -59,6 +72,13 @@ namespace GPP_API.Services
             }
         }
 
+        /// <summary>
+        /// Envía un correo electrónico de confirmación cuando se crea un nuevo proyecto.
+        /// </summary>
+        /// <param name="recipientEmail">La dirección de correo electrónico del destinatario.</param>
+        /// <param name="projectDto">Los detalles del proyecto, encapsulados en un objeto <see cref="ProjectResponseDTO"/>.</param>
+        /// <returns>Una tarea que representa la operación asíncrona de envío del correo electrónico.</returns>
+        /// <remarks>El correo electrónico incluye información sobre el proyecto, como el nombre, el código, la descripción y las partidas presupuestarias asignadas.</remarks>
         public async Task SendProjectCreatedEmail(string recipientEmail, ProjectResponseDTO projectDto)
         {
             var projectName = projectDto.ProjectName;
@@ -68,7 +88,6 @@ namespace GPP_API.Services
 
             var subject = $"Confirmación: Proyecto '{projectName}' Creado Exitosamente";
 
-            // Build the budget parts table rows dynamically
             var budgetPartsTableRows = "";
             if (budgetParts != null && budgetParts.Any())
             {
@@ -89,7 +108,6 @@ namespace GPP_API.Services
                     </tr>";
             }
 
-            // Construct the full HTML message using the provided template
             var message = $@"
 <!DOCTYPE html>
 <html xmlns:v=""urn:schemas-microsoft-com:vml"" xmlns:o=""urn:schemas-microsoft-com:office:office"" lang=""en"">
@@ -388,7 +406,14 @@ namespace GPP_API.Services
             await SendEmailAsync(recipientEmail, subject, message);
         }
 
-
+        /// <summary>
+        /// Envía un correo electrónico de alerta cuando el porcentaje de presupuesto utilizado de un proyecto alcanza o supera un umbral especificado.
+        /// </summary>
+        /// <param name="recipientEmail">La dirección de correo electrónico del destinatario.</param>
+        /// <param name="projectDto">Los detalles del proyecto, encapsulados en un objeto <see cref="AlertProjectResponseDTO"/>.</param>
+        /// <param name="percentage">El porcentaje umbral que, al ser alcanzado, desencadena el envío del correo electrónico.</param>
+        /// <returns>Una tarea que representa la operación asíncrona de envío del correo electrónico.</returns>
+        /// <remarks>El correo electrónico incluye información sobre el estado actual del presupuesto del proyecto, incluyendo el presupuesto total, el monto utilizado y el presupuesto restante.</remarks>
         public async Task SendProjectBudgetPercentageEmail(string recipientEmail, AlertProjectResponseDTO projectDto, decimal percentage)
         {
             var projectName = projectDto.ProjectName;
@@ -615,6 +640,14 @@ namespace GPP_API.Services
             }
         }
 
+        /// <summary>
+        /// Envía un correo electrónico de alerta cuando el porcentaje de presupuesto utilizado de una partida presupuestaria alcanza o supera un umbral especificado.
+        /// </summary>
+        /// <param name="recipientEmail">La dirección de correo electrónico del destinatario.</param>
+        /// <param name="budgetPartDto">Los detalles de la partida presupuestaria, encapsulados en un objeto <see cref="AlertBudgetPartDTO"/>.</param>
+        /// <param name="percentage">El porcentaje umbral que, al ser alcanzado, desencadena el envío del correo electrónico.</param>
+        /// <returns>Una tarea que representa la operación asíncrona de envío del correo electrónico.</returns>
+        /// <remarks>El correo electrónico incluye información sobre el estado actual de la partida presupuestaria, incluyendo el presupuesto asignado, el monto utilizado y el presupuesto restante.</remarks>
         public async Task SendBudgetPartPercentageEmail(string recipientEmail, AlertBudgetPartDTO budgetPartDto, decimal percentage)
         {
             var partName = budgetPartDto.PartName;
@@ -838,7 +871,5 @@ namespace GPP_API.Services
                 await SendEmailAsync(recipientEmail, subject, message);
             }
         }
-
-
     }
 }

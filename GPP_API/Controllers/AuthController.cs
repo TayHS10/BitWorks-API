@@ -3,17 +3,26 @@ using GPP_API.Models;
 using GPP_API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace GPP_API.Controllers
 {
-    public class AuthController : Controller
+   
+    [ApiController]
+    [Route("[controller]")]
+    public class AuthController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
         private readonly IAuthorizationService _authorizationServices;
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
 
+        /// <summary>
+        /// Inicializa una nueva instancia de la clase <see cref="AuthController"/>.
+        /// </summary>
+        /// <param name="context">El contexto de la base de datos.</param>
+        /// <param name="emailService">El servicio de envío de correos electrónicos.</param>
+        /// <param name="configuration">La configuración de la aplicación.</param>
+        /// <param name="authorizationServices">El servicio de autorización.</param>
         public AuthController(ApplicationDbContext context, IEmailService emailService, IConfiguration configuration, IAuthorizationService authorizationServices)
         {
             _context = context;
@@ -22,6 +31,11 @@ namespace GPP_API.Controllers
             _configuration = configuration;
         }
 
+        /// <summary>
+        /// Autentica al usuario y devuelve un token si las credenciales son válidas.
+        /// </summary>
+        /// <param name="authenticated">Objeto con las credenciales de inicio de sesión del usuario.</param>
+        /// <returns>Resultado de la acción con el token o mensaje de error en caso de fallo.</returns>
         [HttpPost("authenticate")]
         public async Task<IActionResult> Authenticate([FromBody] LoginUserDTO authenticated)
         {
@@ -29,12 +43,17 @@ namespace GPP_API.Controllers
 
             if (authorized == null)
             {
-                return Unauthorized(new { success = false, message = "Invalid credentials." });
+                return Unauthorized(new { success = false, message = "Credenciales inválidas." });
             }
 
             return Ok(authorized);
         }
 
+        /// <summary>
+        /// Procesa la solicitud de restablecimiento de contraseña y envía un enlace al correo electrónico del usuario.
+        /// </summary>
+        /// <param name="requestData">Datos de la solicitud que incluyen el correo electrónico del usuario.</param>
+        /// <returns>Resultado de la acción que indica el éxito o el error de la operación.</returns>
         [HttpPost("forgot-password-request")]
         public async Task<IActionResult> ForgotPasswordRequest([FromBody] ForgotPasswordRequestDTO requestData)
         {
@@ -77,7 +96,6 @@ namespace GPP_API.Controllers
                 var resetLink = $"{frontendUrl}/reset-password?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(resetToken)}";
                 var subject = "Restablecimiento de contraseña para tu cuenta";
 
-                // --- INICIO DE LA PLANTILLA HTML ACTUALIZADA ---
                 var messageBody = $@"
                     <!DOCTYPE html>
                     <html xmlns:v=""urn:schemas-microsoft-com:vml"" xmlns:o=""urn:schemas-microsoft-com:office:office"" lang=""en"">
@@ -185,7 +203,7 @@ namespace GPP_API.Controllers
                                                                         <table class=""heading_block block-1"" width=""100%"" border=""0"" cellpadding=""10"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt;"">
                                                                             <tr>
                                                                                 <td class=""pad"">
-                                                                                    <h1 style=""margin: 0; color: #1e0e4b; direction: ltr; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 38px; font-weight: 700; letter-spacing: normal; line-height: 1.2; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 46px;""><span class=""tinyMce-placeholder"" style=""word-break: break-word;"">Restablecer contraseña</span></h1>
+                                                                                    <h1 style=""margin: 0; color: #1e0e4b; direction: ltr; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 38px; font-weight: 700; letter-spacing: normal; line-height: 1.2; text-align: left; margin-top: 0; margin-bottom: 0;""><span class=""tinyMce-placeholder"">Restablecer contraseña</span></h1>
                                                                                 </td>
                                                                             </tr>
                                                                         </table>
@@ -208,7 +226,7 @@ namespace GPP_API.Controllers
                                                                         <table class=""paragraph_block block-1"" width=""100%"" border=""0"" cellpadding=""10"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"">
                                                                             <tr>
                                                                                 <td class=""pad"">
-                                                                                    <div style=""color:#101112;direction:ltr;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;"">
+                                                                                    <div style=""color:#101112;direction:ltr;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;"">
                                                                                         <p style=""margin: 0;"">Hemos recibido una solicitud para <strong>restablecer la contraseña</strong> de tu cuenta. Haz clic en el siguiente enlace para establecer una nueva contraseña:</p>
                                                                                     </div>
                                                                                 </td>
@@ -233,7 +251,7 @@ namespace GPP_API.Controllers
                                                                         <table class=""button_block block-1"" width=""100%"" border=""0"" cellpadding=""10"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt;"">
                                                                             <tr>
                                                                                 <td class=""pad"">
-                                                                                    <div class=""alignment"" align=""center""><a href='{resetLink}' target=""_blank"" style=""background-color: #7747FF; border-bottom: 0px solid transparent; border-left: 0px solid transparent; border-radius: 4px; border-right: 0px solid transparent; border-top: 0px solid transparent; color: #ffffff; display: inline-block; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 16px; font-weight: 400; mso-border-alt: none; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; padding-right: 20px; text-align: center; width: auto; word-break: keep-all; line-height: 32px; text-decoration: none;""><span style=""word-break: break-word;"">Restablecer</span></a></div>
+                                                                                    <div class=""alignment"" align=""center""><a href='{resetLink}' target=""_blank"" style=""background-color: #7747FF; border-bottom: 0px solid transparent; border-left: 0px solid transparent; border-radius: 4px; border-right: 0px solid transparent; border-top: 0px solid transparent; color: #ffffff; display: inline-block; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 16px; font-weight: 400; mso-border-alt: none; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; padding-right: 20px; text-align: center; width: auto; word-break: keep-all; line-height: 32px; text-decoration: none;""><span>Restablecer</span></a></div>
                                                                                 </td>
                                                                             </tr>
                                                                         </table>
@@ -256,7 +274,7 @@ namespace GPP_API.Controllers
                                                                         <table class=""paragraph_block block-1"" width=""100%"" border=""0"" cellpadding=""10"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"">
                                                                             <tr>
                                                                                 <td class=""pad"">
-                                                                                    <div style=""color:#101112;direction:ltr;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;"">
+                                                                                    <div style=""color:#101112;direction:ltr;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;"">
                                                                                         <p style=""margin: 0;"">Este enlace expirará en <u><strong>30 minutos</strong></u>. Si no solicitaste un restablecimiento de contraseña, ignora este correo electrónico.</p>
                                                                                     </div>
                                                                                 </td>
@@ -278,67 +296,12 @@ namespace GPP_API.Controllers
                                                             <tbody>
                                                                 <tr>
                                                                     <td class=""column column-1"" width=""100%"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;"">
-                                                                        <table class=""divider_block block-1"" width=""100%"" border=""0"" cellpadding=""10"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt;"">
-                                                                            <tr>
-                                                                                <td class=""pad"">
-                                                                                    <div class=""alignment"" align=""center"">
-                                                                                        <table border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" width=""100%"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt;"">
-                                                                                            <tr>
-                                                                                                <td class=""divider_inner"" style=""font-size: 1px; line-height: 1px; border-top: 1px solid #dddddd;""><span style=""word-break: break-word;"">&#8202;</span></td>
-                                                                                            </tr>
-                                                                                        </table>
-                                                                                    </div>
-                                                                                </td>
-                                                                            </tr>
-                                                                        </table>
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                        <table class=""row row-6"" align=""center"" width=""100%"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt;"">
-                                            <tbody>
-                                                <tr>
-                                                    <td>
-                                                        <table class=""row-content stack"" align=""center"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-radius: 0; color: #000000; width: 500px; margin: 0 auto;"" width=""500"">
-                                                            <tbody>
-                                                                <tr>
-                                                                    <td class=""column column-1"" width=""100%"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;"">
                                                                         <table class=""paragraph_block block-1"" width=""100%"" border=""0"" cellpadding=""10"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"">
                                                                             <tr>
                                                                                 <td class=""pad"">
-                                                                                    <div style=""color:#101112;direction:ltr;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;"">
+                                                                                    <div style=""color:#101112;direction:ltr;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;"">
                                                                                         <p style=""margin: 0;"">Saludos, Equipo de GPP</p>
                                                                                     </div>
-                                                                                </td>
-                                                                            </tr>
-                                                                        </table>
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                        <table class=""row row-7"" align=""center"" width=""100%"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #ffffff;"">
-                                            <tbody>
-                                                <tr>
-                                                    <td>
-                                                        <table class=""row-content stack"" align=""center"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; background-color: #ffffff; width: 500px; margin: 0 auto;"" width=""500"">
-                                                            <tbody>
-                                                                <tr>
-                                                                    <td class=""column column-1"" width=""100%"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;"">
-                                                                        <table class=""icons_block block-1"" width=""100%"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-align: center; line-height: 0;"">
-                                                                            <tr>
-                                                                                <td class=""pad"" style=""vertical-align: middle; color: #1e0e4b; font-family: 'Inter', sans-serif; font-size: 15px; padding-bottom: 5px; padding-top: 5px; text-align: center;""><table class=""icons-inner"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; padding-left: 0px; padding-right: 0px;"" cellpadding=""0"" cellspacing=""0"" role=""presentation""><tr>
-                                                                                            <td style=""vertical-align: middle; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;""><a href=""http://designedwithbeefree.com/"" target=""_blank"" style=""text-decoration: none;""><img class=""icon"" alt=""Beefree Logo"" src=""https://d1oco4z2z1fhwp.cloudfront.net/assets/Beefree-logo.png"" height=""auto"" width=""34"" align=""center"" style=""display: block; height: auto; margin: 0 auto; border: 0;""></a></td>
-                                                                                            <td style=""font-family: 'Inter', sans-serif; font-size: 15px; font-weight: undefined; color: #1e0e4b; vertical-align: middle; letter-spacing: undefined; text-align: center; line-height: normal;""><a href=""http://designedwithbeefree.com/"" target=""_blank"" style=""color: #1e0e4b; text-decoration: none;"">Designed with Beefree</a></td>
-                                                                                        </tr>
-                                                                                    </table>
                                                                                 </td>
                                                                             </tr>
                                                                         </table>
@@ -357,8 +320,7 @@ namespace GPP_API.Controllers
 
                     </html>
                     ";
-                // --- FIN DE LA PLANTILLA HTML ACTUALIZADA ---
-
+               
                 try
                 {
                     await _emailService.SendEmailAsync(user.Email, subject, messageBody);
@@ -379,6 +341,11 @@ namespace GPP_API.Controllers
             }
         }
 
+        /// <summary>
+        /// Confirma el restablecimiento de la contraseña del usuario utilizando el token y la nueva contraseña proporcionados.
+        /// </summary>
+        /// <param name="resetData">Datos necesarios para el restablecimiento de la contraseña, incluyendo el correo electrónico, el token y las nuevas contraseñas.</param>
+        /// <returns>Resultado de la acción que indica el éxito o el error de la operación.</returns>
         [HttpPost("reset-password-confirm")]
         public async Task<IActionResult> ConfirmPasswordReset([FromBody] ResetPasswordConfirmDTO resetData)
         {
@@ -402,37 +369,31 @@ namespace GPP_API.Controllers
 
                 if (user == null)
                 {
-                    return NotFound(new { success = false, message = "No se encontró ningún usuario con la dirección de correo electrónico proporcionada." });
+                    return NotFound(new { success = false, message = "Usuario no encontrado." });
                 }
 
-                var validToken = await _context.PasswordResetTokens
-                    .Where(t => t.UserId == user.UserId &&
-                                 t.Token == resetData.Token &&
-                                 t.ExpiresAt > DateTime.UtcNow &&
-                                 t.UsedAt == null)
-                    .OrderByDescending(t => t.CreatedAt)
-                    .FirstOrDefaultAsync();
+                var passwordResetToken = await _context.PasswordResetTokens
+                                                        .Where(prt => prt.UserId == user.UserId && prt.Token == resetData.Token && prt.ExpiresAt > DateTime.UtcNow)
+                                                        .OrderByDescending(prt => prt.CreatedAt) // Toma el token más reciente si hay varios.
+                                                        .FirstOrDefaultAsync();
 
-                if (validToken == null)
+                if (passwordResetToken == null)
                 {
-                    return Unauthorized(new { success = false, message = "Token de restablecimiento de contraseña inválido o expirado." });
+                    return BadRequest(new { success = false, message = "Token de restablecimiento inválido o expirado." });
                 }
 
-                user.Password = BCrypt.Net.BCrypt.HashPassword(resetData.NewPassword);
-                user.Status = "Active";
+                user.Password = resetData.NewPassword;
 
-                validToken.UsedAt = DateTime.UtcNow;
+                _context.PasswordResetTokens.Remove(passwordResetToken);
 
-                _context.Users.Update(user);
-                _context.PasswordResetTokens.Update(validToken);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { success = true, message = "La contraseña se ha restablecido correctamente. Ahora puedes iniciar sesión con tu nueva contraseña." });
+                return Ok(new { success = true, message = "Contraseña restablecida exitosamente." });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error durante el restablecimiento de contraseña para {resetData.Email}: {ex.Message}");
-                return StatusCode(500, new { success = false, message = "Ocurrió un error durante el restablecimiento de contraseña.", detail = ex.Message });
+                Console.WriteLine($"Error al confirmar el restablecimiento de contraseña: {ex.Message}");
+                return StatusCode(500, new { success = false, message = "Ocurrió un error al restablecer la contraseña.", detail = ex.Message });
             }
         }
     }
