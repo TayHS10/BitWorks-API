@@ -261,14 +261,14 @@ public partial class ApplicationDbContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("status");
-            entity.Property(e => e.UserEmail)
+            entity.Property(e => e.EmailAddress)
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("user_email");
 
             entity.HasOne(d => d.UserEmailNavigation).WithMany(p => p.RoleChangeRequests)
                 .HasPrincipalKey(p => p.Email)
-                .HasForeignKey(d => d.UserEmail)
+                .HasForeignKey(d => d.EmailAddress)
                 .HasConstraintName("FK__RoleChang__user___5165187F");
         });
 

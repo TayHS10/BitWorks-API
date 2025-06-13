@@ -1,5 +1,6 @@
 ﻿using GPP_API.DTO.BudgetPart;
 using GPP_API.DTO.Project;
+using GPP_API.DTO.RoleChangeRequest;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
@@ -870,6 +871,550 @@ namespace GPP_API.Services
 
                 await SendEmailAsync(recipientEmail, subject, message);
             }
+        }
+
+        /// <summary>
+        /// Envía un correo electrónico para notificar a un usuario que su rol ha sido actualizado.
+        /// </summary>
+        /// <param name="toEmail">La dirección de correo electrónico del destinatario.</param>
+        /// <param name="newRole">El nuevo rol asignado al usuario.</param>
+        /// <returns>Una tarea que representa la operación asíncrona de envío del correo electrónico.</returns>
+        public async Task SendRoleUpdatedEmail(string toEmail, string newRole)
+        {
+            var subject = "Actualización de Rol de Usuario";
+            var message = $@"
+<!DOCTYPE html>
+<html xmlns:v=""urn:schemas-microsoft-com:vml"" xmlns:o=""urn:schemas-microsoft-com:office:office"" lang=""en"">
+
+<head>
+    <title>Actualización de Rol</title>
+    <meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0""><style>
+        * {{
+            box-sizing: border-box;
+        }}
+
+        body {{
+            margin: 0;
+            padding: 0;
+        }}
+
+        a[x-apple-data-detectors] {{
+            color: inherit !important;
+            text-decoration: inherit !important;
+        }}
+
+        #MessageViewBody a {{
+            color: inherit;
+            text-decoration: none;
+        }}
+
+        p {{
+            line-height: inherit
+        }}
+
+        .desktop_hide,
+        .desktop_hide table {{
+            mso-hide: all;
+            display: none;
+            max-height: 0px;
+            overflow: hidden;
+        }}
+
+        .image_block img+div {{
+            display: none;
+        }}
+
+        sup,
+        sub {{
+            font-size: 75%;
+            line-height: 0;
+        }}
+
+        @media (max-width:620px) {{
+            .desktop_hide table.icons-inner {{
+                display: inline-block !important;
+            }}
+
+            .icons-inner {{
+                text-align: center;
+            }}
+
+            .icons-inner td {{
+                margin: 0 auto;
+            }}
+
+            .mobile_hide {{
+                display: none;
+            }}
+
+            .row-content {{
+                width: 100% !important;
+            }}
+
+            .stack .column {{
+                width: 100%;
+                display: block;
+            }}
+
+            .mobile_hide {{
+                min-height: 0;
+                max-height: 0;
+                max-width: 0;
+                overflow: hidden;
+                font-size: 0px;
+            }}
+
+            .desktop_hide,
+            .desktop_hide table {{
+                display: table !important;
+                max-height: none !important;
+            }}
+        }}
+    </style></head>
+
+<body class=""body"" style=""background-color: #ffffff; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;"">
+    <table class=""nl-container"" width=""100%"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #ffffff;"">
+        <tbody>
+            <tr>
+                <td>
+                    <table class=""row row-1"" align=""center"" width=""100%"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt;"">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class=""row-content stack"" align=""center"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; width: 600px; margin: 0 auto;"" width=""600"">
+                                        <tbody>
+                                            <tr>
+                                                <td class=""column column-1"" width=""100%"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;"">
+                                                    <table class=""heading_block block-1"" width=""100%"" border=""0"" cellpadding=""10"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt;"">
+                                                        <tr>
+                                                            <td class=""pad"">
+                                                                <h1 style=""margin: 0; color: #3a889d; direction: ltr; font-family: Arial, Helvetica, sans-serif; font-size: 38px; font-weight: 700; letter-spacing: normal; line-height: 1.2; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 46px;""><span class=""tinyMce-placeholder"" style=""word-break: break-word;"">ACTUALIZACIÓN DE ROL</span></h1>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <table class=""paragraph_block block-2"" width=""100%"" border=""0"" cellpadding=""10"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"">
+                                                        <tr>
+                                                            <td class=""pad"">
+                                                                <div style=""color:#101112;direction:ltr;font-family:Arial, Helvetica, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;"">
+                                                                    <p style=""margin: 0; margin-bottom: 16px;"">Estimado usuario,</p>
+                                                                    <p style=""margin: 0; margin-bottom: 16px;"">Le informamos que su rol en nuestro sistema ha sido actualizado.</p>
+                                                                    <p style=""margin: 0; margin-bottom: 16px;"">Su nuevo rol es: <strong>{newRole}</strong></p>
+                                                                    <p style=""margin: 0; margin-bottom: 16px;"">Ahora tiene acceso a las funcionalidades y permisos asociados a su nuevo rol.</p>
+                                                                    <p style=""margin: 0;"">Saludos cordiales.</p>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class=""row row-2"" align=""center"" width=""100%"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #ffffff;"">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class=""row-content stack"" align=""center"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; width: 600px; margin: 0 auto;"" width=""600"">
+                                        <tbody>
+                                            <tr>
+                                                <td class=""column column-1"" width=""100%"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;"">
+                                                    <table class=""icons_block block-1"" width=""100%"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-align: center; line-height: 0;"">
+                                                        <tr>
+                                                            <td class=""pad"" style=""vertical-align: middle; color: #1e0e4b; font-family: 'Inter', sans-serif; font-size: 15px; padding-bottom: 5px; padding-top: 5px; text-align: center;""><table class=""icons-inner"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; padding-left: 0px; padding-right: 0px;"" cellpadding=""0"" cellspacing=""0"" role=""presentation""><tr>
+                                                                        <td style=""vertical-align: middle; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;""><a href=""http://designedwithbeefree.com/"" target=""_blank"" style=""text-decoration: none;""><img class=""icon"" alt=""Beefree Logo"" src=""https://d1oco4z2z1fhwp.cloudfront.net/assets/Beefree-logo.png"" height=""auto"" width=""34"" align=""center"" style=""display: block; height: auto; margin: 0 auto; border: 0;""></a></td>
+                                                                        <td style=""font-family: 'Inter', sans-serif; font-size: 15px; font-weight: undefined; color: #1e0e4b; vertical-align: middle; letter-spacing: undefined; text-align: center; line-height: normal;""><a href=""http://designedwithbeefree.com/"" target=""_blank"" style=""color: #1e0e4b; text-decoration: none;"">Designed with Beefree</a></td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table></body>
+
+</html>";
+
+            await SendEmailAsync(toEmail, subject, message);
+        }
+
+        /// <summary>
+        /// Envía un correo electrónico para notificar a un usuario que su solicitud de cambio de rol ha sido rechazada.
+        /// </summary>
+        /// <param name="toEmail">La dirección de correo electrónico del destinatario.</param>
+        /// <param name="requestDto">Los detalles de la solicitud de cambio de rol.</param>
+        /// <returns>Una tarea que representa la operación asíncrona de envío del correo electrónico.</returns>
+        public async Task SendRoleChangeRequestRejectedEmail(string toEmail, RoleChangeRequestDTO requestDto)
+        {
+            var subject = "Su solicitud de cambio de rol ha sido rechazada";
+            var message = $@"
+<!DOCTYPE html>
+<html xmlns:v=""urn:schemas-microsoft-com:vml"" xmlns:o=""urn:schemas-microsoft-com:office:office"" lang=""en"">
+
+<head>
+    <title>Solicitud de Rol Rechazada</title>
+    <meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0""><style>
+        * {{
+            box-sizing: border-box;
+        }}
+
+        body {{
+            margin: 0;
+            padding: 0;
+        }}
+
+        a[x-apple-data-detectors] {{
+            color: inherit !important;
+            text-decoration: inherit !important;
+        }}
+
+        #MessageViewBody a {{
+            color: inherit;
+            text-decoration: none;
+        }}
+
+        p {{
+            line-height: inherit
+        }}
+
+        .desktop_hide,
+        .desktop_hide table {{
+            mso-hide: all;
+            display: none;
+            max-height: 0px;
+            overflow: hidden;
+        }}
+
+        .image_block img+div {{
+            display: none;
+        }}
+
+        sup,
+        sub {{
+            font-size: 75%;
+            line-height: 0;
+        }}
+
+        @media (max-width:620px) {{
+            .desktop_hide table.icons-inner {{
+                display: inline-block !important;
+            }}
+
+            .icons-inner {{
+                text-align: center;
+            }}
+
+            .icons-inner td {{
+                margin: 0 auto;
+            }}
+
+            .mobile_hide {{
+                display: none;
+            }}
+
+            .row-content {{
+                width: 100% !important;
+            }}
+
+            .stack .column {{
+                width: 100%;
+                display: block;
+            }}
+
+            .mobile_hide {{
+                min-height: 0;
+                max-height: 0;
+                max-width: 0;
+                overflow: hidden;
+                font-size: 0px;
+            }}
+
+            .desktop_hide,
+            .desktop_hide table {{
+                display: table !important;
+                max-height: none !important;
+            }}
+        }}
+    </style></head>
+
+<body class=""body"" style=""background-color: #ffffff; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;"">
+    <table class=""nl-container"" width=""100%"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #ffffff;"">
+        <tbody>
+            <tr>
+                <td>
+                    <table class=""row row-1"" align=""center"" width=""100%"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt;"">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class=""row-content stack"" align=""center"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; width: 600px; margin: 0 auto;"" width=""600"">
+                                        <tbody>
+                                            <tr>
+                                                <td class=""column column-1"" width=""100%"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;"">
+                                                    <table class=""heading_block block-1"" width=""100%"" border=""0"" cellpadding=""10"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt;"">
+                                                        <tr>
+                                                            <td class=""pad"">
+                                                                <h1 style=""margin: 0; color: #3a889d; direction: ltr; font-family: Arial, Helvetica, sans-serif; font-size: 38px; font-weight: 700; letter-spacing: normal; line-height: 1.2; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 46px;""><span class=""tinyMce-placeholder"" style=""word-break: break-word;"">SOLICITUD DE ROL RECHAZADA</span></h1>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <table class=""paragraph_block block-2"" width=""100%"" border=""0"" cellpadding=""10"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"">
+                                                        <tr>
+                                                            <td class=""pad"">
+                                                                <div style=""color:#101112;direction:ltr;font-family:Arial, Helvetica, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;"">
+                                                                    <p style=""margin: 0; margin-bottom: 16px;"">Estimado usuario {requestDto.FullName ?? ""},</p>
+                                                                    <p style=""margin: 0; margin-bottom: 16px;"">Lamentamos informarle que su solicitud para cambiar su rol a <strong>{requestDto.RequestedRole ?? "no especificado"}</strong> ha sido rechazada.</p>
+                                                                    <p style=""margin: 0; margin-bottom: 16px;""><strong>Detalles de la solicitud:</strong></p>
+                                                                    <ul style=""margin: 0; margin-bottom: 16px; padding-left: 20px;"">
+                                                                        <li><strong>Rol Solicitado:</strong> {requestDto.RequestedRole ?? "N/A"}</li>
+                                                                        <li><strong>Justificación:</strong> {requestDto.Justification ?? "N/A"}</li>
+                                                                        <li><strong>Fecha de Solicitud:</strong> {requestDto.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A"}</li>
+                                                                    </ul>
+                                                                    <p style=""margin: 0; margin-bottom: 16px;"">Si tiene alguna pregunta o considera que ha habido un error, no dude en ponerse en contacto con el soporte técnico.</p>
+                                                                    <p style=""margin: 0;"">Saludos cordiales.</p>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class=""row row-2"" align=""center"" width=""100%"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #ffffff;"">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class=""row-content stack"" align=""center"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; width: 600px; margin: 0 auto;"" width=""600"">
+                                        <tbody>
+                                            <tr>
+                                                <td class=""column column-1"" width=""100%"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;"">
+                                                    <table class=""icons_block block-1"" width=""100%"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-align: center; line-height: 0;"">
+                                                        <tr>
+                                                            <td class=""pad"" style=""vertical-align: middle; color: #1e0e4b; font-family: 'Inter', sans-serif; font-size: 15px; padding-bottom: 5px; padding-top: 5px; text-align: center;""><table class=""icons-inner"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; padding-left: 0px; padding-right: 0px;"" cellpadding=""0"" cellspacing=""0"" role=""presentation""><tr>
+                                                                        <td style=""vertical-align: middle; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;""><a href=""http://designedwithbeefree.com/"" target=""_blank"" style=""text-decoration: none;""><img class=""icon"" alt=""Beefree Logo"" src=""https://d1oco4z2z1fhwp.cloudfront.net/assets/Beefree-logo.png"" height=""auto"" width=""34"" align=""center"" style=""display: block; height: auto; margin: 0 auto; border: 0;""></a></td>
+                                                                        <td style=""font-family: 'Inter', sans-serif; font-size: 15px; font-weight: undefined; color: #1e0e4b; vertical-align: middle; letter-spacing: undefined; text-align: center; line-height: normal;""><a href=""http://designedwithbeefree.com/"" target=""_blank"" style=""color: #1e0e4b; text-decoration: none;"">Designed with Beefree</a></td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table></body>
+
+</html>";
+
+            await SendEmailAsync(toEmail, subject, message);
+        }
+
+        /// <summary>
+        /// Envía un correo electrónico de bienvenida a un nuevo usuario con sus credenciales iniciales.
+        /// </summary>
+        /// <param name="toEmail">La dirección de correo electrónico del nuevo usuario.</param>
+        /// <param name="fullName">El nombre completo del nuevo usuario.</param>
+        /// <param name="generatedPassword">La contraseña generada para el nuevo usuario.</param>
+        /// <param name="role">El rol asignado al nuevo usuario.</param>
+        /// <returns>Una tarea que representa la operación asíncrona de envío del correo electrónico.</returns>
+        public async Task SendNewUserWelcomeEmail(string toEmail, string fullName, string generatedPassword, string role)
+        {
+            var subject = "¡Bienvenido a nuestro sistema! Su cuenta ha sido creada.";
+            var message = $@"
+<!DOCTYPE html>
+<html xmlns:v=""urn:schemas-microsoft-com:vml"" xmlns:o=""urn:schemas-microsoft-com:office:office"" lang=""en"">
+
+<head>
+    <title>Bienvenida de Nuevo Usuario</title>
+    <meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0""><style>
+        * {{
+            box-sizing: border-box;
+        }}
+
+        body {{
+            margin: 0;
+            padding: 0;
+        }}
+
+        a[x-apple-data-detectors] {{
+            color: inherit !important;
+            text-decoration: inherit !important;
+        }}
+
+        #MessageViewBody a {{
+            color: inherit;
+            text-decoration: none;
+        }}
+
+        p {{
+            line-height: inherit
+        }}
+
+        .desktop_hide,
+        .desktop_hide table {{
+            mso-hide: all;
+            display: none;
+            max-height: 0px;
+            overflow: hidden;
+        }}
+
+        .image_block img+div {{
+            display: none;
+        }}
+
+        sup,
+        sub {{
+            font-size: 75%;
+            line-height: 0;
+        }}
+
+        @media (max-width:620px) {{
+            .desktop_hide table.icons-inner {{
+                display: inline-block !important;
+            }}
+
+            .icons-inner {{
+                text-align: center;
+            }}
+
+            .icons-inner td {{
+                margin: 0 auto;
+            }}
+
+            .mobile_hide {{
+                display: none;
+            }}
+
+            .row-content {{
+                width: 100% !important;
+            }}
+
+            .stack .column {{
+                width: 100%;
+                display: block;
+            }}
+
+            .mobile_hide {{
+                min-height: 0;
+                max-height: 0;
+                max-width: 0;
+                overflow: hidden;
+                font-size: 0px;
+            }}
+
+            .desktop_hide,
+            .desktop_hide table {{
+                display: table !important;
+                max-height: none !important;
+            }}
+        }}
+    </style></head>
+
+<body class=""body"" style=""background-color: #ffffff; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;"">
+    <table class=""nl-container"" width=""100%"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #ffffff;"">
+        <tbody>
+            <tr>
+                <td>
+                    <table class=""row row-1"" align=""center"" width=""100%"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt;"">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class=""row-content stack"" align=""center"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; width: 600px; margin: 0 auto;"" width=""600"">
+                                        <tbody>
+                                            <tr>
+                                                <td class=""column column-1"" width=""100%"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;"">
+                                                    <table class=""heading_block block-1"" width=""100%"" border=""0"" cellpadding=""10"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt;"">
+                                                        <tr>
+                                                            <td class=""pad"">
+                                                                <h1 style=""margin: 0; color: #3a889d; direction: ltr; font-family: Arial, Helvetica, sans-serif; font-size: 38px; font-weight: 700; letter-spacing: normal; line-height: 1.2; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 46px;""><span class=""tinyMce-placeholder"" style=""word-break: break-word;"">¡BIENVENIDO!</span></h1>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <table class=""paragraph_block block-2"" width=""100%"" border=""0"" cellpadding=""10"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"">
+                                                        <tr>
+                                                            <td class=""pad"">
+                                                                <div style=""color:#101112;direction:ltr;font-family:Arial, Helvetica, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;"">
+                                                                    <p style=""margin: 0; margin-bottom: 16px;"">Hola {fullName},</p>
+                                                                    <p style=""margin: 0; margin-bottom: 16px;"">¡Su cuenta en nuestro sistema ha sido creada exitosamente! Le damos la más cordial bienvenida.</p>
+                                                                    <p style=""margin: 0; margin-bottom: 16px;"">Estos son sus datos de acceso iniciales:</p>
+                                                                    <ul style=""margin: 0; margin-bottom: 16px; padding-left: 20px;"">
+                                                                        <li><strong>Correo Electrónico:</strong> {toEmail}</li>
+                                                                        <li><strong>Contraseña Temporal:</strong> {generatedPassword}</li>
+                                                                        <li><strong>Su Rol Asignado:</strong> {role}</li>
+                                                                    </ul>
+                                                                    <p style=""margin: 0; margin-bottom: 16px;"">Le recomendamos encarecidamente que cambie su contraseña después de su primer inicio de sesión para garantizar la seguridad de su cuenta.</p>
+                                                                    <p style=""margin: 0;"">¡Gracias por unirse a nosotros!</p>
+                                                                    <p style=""margin: 0;"">Saludos cordiales.</p>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class=""row row-2"" align=""center"" width=""100%"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #ffffff;"">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class=""row-content stack"" align=""center"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; width: 600px; margin: 0 auto;"" width=""600"">
+                                        <tbody>
+                                            <tr>
+                                                <td class=""column column-1"" width=""100%"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;"">
+                                                    <table class=""icons_block block-1"" width=""100%"" border=""0"" cellpadding=""0"" cellspacing=""0"" role=""presentation"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-align: center; line-height: 0;"">
+                                                        <tr>
+                                                            <td class=""pad"" style=""vertical-align: middle; color: #1e0e4b; font-family: 'Inter', sans-serif; font-size: 15px; padding-bottom: 5px; padding-top: 5px; text-align: center;""><table class=""icons-inner"" style=""mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; padding-left: 0px; padding-right: 0px;"" cellpadding=""0"" cellspacing=""0"" role=""presentation""><tr>
+                                                                        <td style=""vertical-align: middle; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;""><a href=""http://designedwithbeefree.com/"" target=""_blank"" style=""text-decoration: none;""><img class=""icon"" alt=""Beefree Logo"" src=""https://d1oco4z2z1fhwp.cloudfront.net/assets/Beefree-logo.png"" height=""auto"" width=""34"" align=""center"" style=""display: block; height: auto; margin: 0 auto; border: 0;""></a></td>
+                                                                        <td style=""font-family: 'Inter', sans-serif; font-size: 15px; font-weight: undefined; color: #1e0e4b; vertical-align: middle; letter-spacing: undefined; text-align: center; line-height: normal;""><a href=""http://designedwithbeefree.com/"" target=""_blank"" style=""color: #1e0e4b; text-decoration: none;"">Designed with Beefree</a></td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table></body>
+
+</html>";
+
+            await SendEmailAsync(toEmail, subject, message);
         }
     }
 }
