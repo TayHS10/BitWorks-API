@@ -434,5 +434,39 @@ namespace GPP_API.Controllers
                 CreatedAt = e.CreatedAt
             }).ToList()
         };
+
+        /// <summary>
+        /// Recupera todos los proyectos asignados a un gestor específico, basado en su correo electrónico.
+        /// </summary>
+        /// <param name="managerEmail">El correo electrónico del gestor.</param>
+        /// <returns>Una lista de proyectos asignados al gestor o un mensaje de error en caso de fallo.</returns>
+        [HttpGet("manager/{managerEmail}")]
+        public async Task<IActionResult> GetProjectsByManager(string managerEmail)
+        {
+            try
+            {
+                var projects = await _context.Projects
+                    .Where(p => p.ManagerEmail == managerEmail && p.Status == "Active")
+                    .Include(p => p.Alerts)
+                    .Include(p => p.BudgetParts).ThenInclude(b => b.Expenses)
+                    .Include(p => p.ManagerEmailNavigation)
+                    .ToListAsync();
+
+                if (!projects.Any())
+                {
+                    return NotFound(new { success = false, message = $"No se encontraron proyectos para el gestor con el correo {managerEmail}." });
+                }
+
+                var dtoList = projects.Select(MapToProjectResponseDTO).ToList();
+
+                return Ok(new { success = true, data = dtoList });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ocurrió un error al recuperar los proyectos del gestor con correo {ManagerEmail}.", managerEmail);
+                return StatusCode(500, new { success = false, message = "Error al obtener proyectos del gestor.", detail = ex.Message });
+            }
+        }
+
     }
 }

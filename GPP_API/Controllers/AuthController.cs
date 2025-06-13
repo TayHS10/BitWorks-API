@@ -3,6 +3,7 @@ using GPP_API.Models;
 using GPP_API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using BCrypt.Net;
 
 namespace GPP_API.Controllers
 {
@@ -92,8 +93,7 @@ namespace GPP_API.Controllers
                     Console.WriteLine("Advertencia: La URL del frontend no está configurada en appsettings.json. No se pudo generar el enlace de restablecimiento de contraseña.");
                     return StatusCode(500, new { success = false, message = "Ocurrió un error al procesar la solicitud de restablecimiento de contraseña: URL del frontend no configurada." });
                 }
-
-                var resetLink = $"{frontendUrl}/reset-password?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(resetToken)}";
+                var resetLink = $"{frontendUrl}?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(resetToken)}";
                 var subject = "Restablecimiento de contraseña para tu cuenta";
 
                 var messageBody = $@"
@@ -349,6 +349,7 @@ namespace GPP_API.Controllers
         [HttpPost("reset-password-confirm")]
         public async Task<IActionResult> ConfirmPasswordReset([FromBody] ResetPasswordConfirmDTO resetData)
         {
+            // Validación de los datos recibidos
             if (resetData == null ||
                 string.IsNullOrWhiteSpace(resetData.Email) ||
                 string.IsNullOrWhiteSpace(resetData.Token) ||
@@ -358,6 +359,7 @@ namespace GPP_API.Controllers
                 return BadRequest(new { success = false, message = "El correo electrónico, el token, la nueva contraseña y la confirmación son requeridos." });
             }
 
+            // Verificación de que las contraseñas coinciden
             if (resetData.NewPassword != resetData.ConfirmNewPassword)
             {
                 return BadRequest(new { success = false, message = "La nueva contraseña y la contraseña de confirmación no coinciden." });
@@ -365,6 +367,7 @@ namespace GPP_API.Controllers
 
             try
             {
+                // Buscar al usuario en la base de datos
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(resetData.Email));
 
                 if (user == null)
@@ -372,9 +375,10 @@ namespace GPP_API.Controllers
                     return NotFound(new { success = false, message = "Usuario no encontrado." });
                 }
 
+                // Verificar si el token de restablecimiento es válido
                 var passwordResetToken = await _context.PasswordResetTokens
                                                         .Where(prt => prt.UserId == user.UserId && prt.Token == resetData.Token && prt.ExpiresAt > DateTime.UtcNow)
-                                                        .OrderByDescending(prt => prt.CreatedAt) // Toma el token más reciente si hay varios.
+                                                        .OrderByDescending(prt => prt.CreatedAt) // Tomar el token más reciente si hay varios.
                                                         .FirstOrDefaultAsync();
 
                 if (passwordResetToken == null)
@@ -382,16 +386,23 @@ namespace GPP_API.Controllers
                     return BadRequest(new { success = false, message = "Token de restablecimiento inválido o expirado." });
                 }
 
-                user.Password = resetData.NewPassword;
+                // Hashear la nueva contraseña utilizando bcrypt
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(resetData.NewPassword);
 
+                // Actualizar la contraseña del usuario con la nueva contraseña hasheada
+                user.Password = hashedPassword;
+
+                // Eliminar el token de restablecimiento (ya no es necesario)
                 _context.PasswordResetTokens.Remove(passwordResetToken);
 
+                // Guardar los cambios en la base de datos
                 await _context.SaveChangesAsync();
 
                 return Ok(new { success = true, message = "Contraseña restablecida exitosamente." });
             }
             catch (Exception ex)
             {
+                // Manejar errores de la base de datos o de otras excepciones
                 Console.WriteLine($"Error al confirmar el restablecimiento de contraseña: {ex.Message}");
                 return StatusCode(500, new { success = false, message = "Ocurrió un error al restablecer la contraseña.", detail = ex.Message });
             }
