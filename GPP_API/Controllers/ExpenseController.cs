@@ -295,5 +295,76 @@ namespace GPP_API.Controllers
                 return StatusCode(500, new { success = false, message = "Error al obtener el gasto.", detail = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Recupera todos los gastos asociados a un proyecto específico.
+        /// </summary>
+        /// <param name="projectId">El ID del proyecto al que se le quieren recuperar los gastos.</param>
+        /// <returns>Una lista de los gastos asociados al proyecto en formato DTO o un mensaje de error en caso de fallo.</returns>
+        [HttpGet("project/{projectId}/expenses")]
+        public async Task<IActionResult> GetExpensesByProject(int projectId)
+        {
+            try
+            {
+                var expenses = await _context.Expenses
+                    .Include(e => e.BudgetPart)
+                        .ThenInclude(bp => bp.Project)
+                    .Where(e => e.Status == "Active" &&
+                                e.BudgetPart.ProjectId == projectId &&
+                                e.BudgetPart.Project.Status == "Active" &&
+                                e.BudgetPart.Status == "Active")
+                    .ToListAsync();
+
+                var dtoList = expenses.Select(MapToExpenseResponseDTO).ToList();
+
+                if (dtoList.Count == 0)
+                {
+                    return NotFound(new { success = false, message = "No se encontraron gastos activos para el proyecto." });
+                }
+
+                return Ok(new { success = true, data = dtoList });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al recuperar los gastos del proyecto con ID {ProjectId}.", projectId);
+                return StatusCode(500, new { success = false, message = "Error al obtener los gastos del proyecto.", detail = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Recupera todos los gastos asociados a una partida presupuestaria específica.
+        /// </summary>
+        /// <param name="budgetPartId">El ID de la partida presupuestaria al que se le quieren recuperar los gastos.</param>
+        /// <returns>Una lista de los gastos asociados a la partida presupuestaria en formato DTO o un mensaje de error en caso de fallo.</returns>
+        [HttpGet("budgetpart/{budgetPartId}/expenses")]
+        public async Task<IActionResult> GetExpensesByBudgetPart(int budgetPartId)
+        {
+            try
+            {
+                var expenses = await _context.Expenses
+                    .Include(e => e.BudgetPart)
+                        .ThenInclude(bp => bp.Project)
+                    .Where(e => e.Status == "Active" &&
+                                e.BudgetPart.BudgetPartId == budgetPartId &&
+                                e.BudgetPart.Status == "Active" &&
+                                e.BudgetPart.Project.Status == "Active")
+                    .ToListAsync();
+
+                var dtoList = expenses.Select(MapToExpenseResponseDTO).ToList();
+
+                if (dtoList.Count == 0)
+                {
+                    return NotFound(new { success = false, message = "No se encontraron gastos activos para la partida presupuestaria." });
+                }
+
+                return Ok(new { success = true, data = dtoList });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al recuperar los gastos de la partida presupuestaria con ID {BudgetPartId}.", budgetPartId);
+                return StatusCode(500, new { success = false, message = "Error al obtener los gastos de la partida presupuestaria.", detail = ex.Message });
+            }
+        }
+
     }
 }

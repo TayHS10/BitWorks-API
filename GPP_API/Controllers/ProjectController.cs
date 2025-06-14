@@ -419,6 +419,7 @@ namespace GPP_API.Controllers
         private static BudgetPartResponseDTO MapToBudgetPartDTO(BudgetPart b) => new()
         {
             BudgetPartId = b.BudgetPartId,
+            ProjectId = b.ProjectId,
             PartName = b.PartName,
             AllocatedAmount = b.AllocatedAmount,
             RemainingAmount = b.RemainingAmount,

@@ -161,6 +161,7 @@ namespace GPP_API.Controllers
         private static BudgetPartResponseDTO MapToBudgetPartDTO(BudgetPart b) => new()
         {
             BudgetPartId = b.BudgetPartId,
+            ProjectId = b.ProjectId,
             PartName = b.PartName,
             AllocatedAmount = b.AllocatedAmount,
             RemainingAmount = b.RemainingAmount,
@@ -435,5 +436,39 @@ namespace GPP_API.Controllers
                 return StatusCode(500, new { success = false, message = "Error inesperado al actualizar el nombre de la partida presupuestaria.", detail = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Recupera todas las partidas presupuestarias activas asociadas a un proyecto específico.
+        /// </summary>
+        /// <param name="projectId">El ID del proyecto para el cual se recuperarán las partidas presupuestarias.</param>
+        /// <returns>Resultado de la acción que contiene las partidas presupuestarias o un mensaje de error en caso de fallo.</returns>
+        [HttpGet("project/{projectId}/budgetparts")]
+        public async Task<IActionResult> GetBudgetPartsByProject(int projectId)
+        {
+            try
+            {
+                // Recupera las partidas presupuestarias activas asociadas al proyecto especificado
+                var budgetParts = await _context.BudgetParts
+                    .Include(b => b.Project)
+                    .Where(b => b.ProjectId == projectId && b.Status == "Active")
+                    .ToListAsync();
+
+                if (budgetParts.Count == 0)
+                {
+                    return NotFound(new { success = false, message = $"No se encontraron partidas presupuestarias activas para el proyecto con ID {projectId}." });
+                }
+
+                // Mapea las partidas presupuestarias a DTOs
+                var dtoList = budgetParts.Select(MapToBudgetPartDTO).ToList();
+
+                return Ok(new { success = true, data = dtoList });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al recuperar las partidas presupuestarias para el proyecto con ID {projectId}.");
+                return StatusCode(500, new { success = false, message = "Error al obtener las partidas presupuestarias.", detail = ex.Message });
+            }
+        }
+
     }
 }
